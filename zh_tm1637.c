@@ -42,7 +42,7 @@ esp_err_t zh_tm1637_deinit(zh_tm1637_handle_t *handle) // -V2008
     ZH_ERROR_CHECK(handle != NULL, ESP_ERR_INVALID_ARG, NULL, "Led drive deinitialization failed. Invalid argument.");
     ZH_ERROR_CHECK(handle->is_initialized == true, ESP_FAIL, NULL, "Led drive deinitialization failed. Led drive not initialized.");
     ZH_ERROR_CHECK(rmt_disable(handle->tx_channel[0]) == ESP_OK, ESP_FAIL, NULL, "Led drive deinitialization failed. TX channel disable failed.");
-    ZH_ERROR_CHECK(rmt_disable(handle->tx_channel[1]) == ESP_OK, ESP_FAIL, NULL, "Led drive deinitialization failed. RX channel disable failed.");
+    ZH_ERROR_CHECK(rmt_disable(handle->tx_channel[1]) == ESP_OK, ESP_FAIL, NULL, "Led drive deinitialization failed. TX channel disable failed.");
     ZH_ERROR_CHECK(rmt_del_encoder(handle->copy_encoder) == ESP_OK, ESP_FAIL, NULL, "Led drive deinitialization failed. Delete encoder failed.");
     ZH_ERROR_CHECK(rmt_del_channel(handle->tx_channel[0]) == ESP_OK, ESP_FAIL, NULL, "Led drive deinitialization failed. Delete TX channel failed.");
     ZH_ERROR_CHECK(rmt_del_channel(handle->tx_channel[1]) == ESP_OK, ESP_FAIL, NULL, "Led drive deinitialization failed. Delete TX channel failed.");
