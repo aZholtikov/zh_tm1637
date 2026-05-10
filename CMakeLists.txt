@@ -1,1 +1,6 @@
-idf_component_register(SRCS "main.c" INCLUDE_DIRS "include")
+if(${IDF_VERSION_MAJOR} STREQUAL 6)
+    set(requires esp_driver_rmt)
+else()
+    set(requires driver)
+endif()
+idf_component_register(SRCS "zh_tm1637.c" INCLUDE_DIRS "include" REQUIRES ${requires})
