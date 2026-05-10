@@ -118,6 +118,7 @@ static esp_err_t _zh_tm1637_rmt_init(const zh_tm1637_init_config_t *config, zh_t
                    ZH_ERROR_CHECK(rmt_del_channel(handle->tx_channel[0]) == ESP_OK, ESP_FAIL, NULL, "Delete channel failed.");
                    ZH_ERROR_CHECK(rmt_del_channel(handle->tx_channel[1]) == ESP_OK, ESP_FAIL, NULL, "Delete channel failed."), "Enable TX channel failed.");
     ZH_ERROR_CHECK(rmt_enable(handle->tx_channel[1]) == ESP_OK, ESP_FAIL,
+                   ZH_ERROR_CHECK(rmt_disable(handle->tx_channel[0]) == ESP_OK, ESP_FAIL, NULL, "TX channel disable failed.");
                    ZH_ERROR_CHECK(rmt_del_encoder(handle->copy_encoder) == ESP_OK, ESP_FAIL, NULL, "Delete encoder failed.");
                    ZH_ERROR_CHECK(rmt_del_channel(handle->tx_channel[0]) == ESP_OK, ESP_FAIL, NULL, "Delete channel failed.");
                    ZH_ERROR_CHECK(rmt_del_channel(handle->tx_channel[1]) == ESP_OK, ESP_FAIL, NULL, "Delete channel failed."), "Enable TX channel failed.");
