@@ -137,8 +137,8 @@ static esp_err_t _zh_tm1637_rmt_init(const zh_tm1637_init_config_t *config, zh_t
     rmt_sync_reset(handle->synchro);
     ZH_ERROR_CHECK(rmt_transmit(handle->tx_channel[0], handle->copy_encoder, &init_symbols, sizeof(init_symbols), &tx_transmit_config) == ESP_OK, ESP_FAIL, ++_stats.rmt_driver_error, "RMT driver error.");
     ZH_ERROR_CHECK(rmt_transmit(handle->tx_channel[1], handle->copy_encoder, &init_symbols, sizeof(init_symbols), &tx_transmit_config) == ESP_OK, ESP_FAIL, ++_stats.rmt_driver_error, "RMT driver error.");
-    ZH_ERROR_CHECK(rmt_tx_wait_all_done(handle->tx_channel[0], 10) == ESP_OK, ESP_FAIL, ++_stats.rmt_driver_error, "RMT driver error.");
-    ZH_ERROR_CHECK(rmt_tx_wait_all_done(handle->tx_channel[1], 10) == ESP_OK, ESP_FAIL, ++_stats.rmt_driver_error, "RMT driver error.");
+    ZH_ERROR_CHECK(rmt_tx_wait_all_done(handle->tx_channel[0], 1000 / portTICK_PERIOD_MS) == ESP_OK, ESP_FAIL, ++_stats.rmt_driver_error, "RMT driver error.");
+    ZH_ERROR_CHECK(rmt_tx_wait_all_done(handle->tx_channel[1], 1000 / portTICK_PERIOD_MS) == ESP_OK, ESP_FAIL, ++_stats.rmt_driver_error, "RMT driver error.");
     return ESP_OK;
 }
 
@@ -168,7 +168,7 @@ static esp_err_t _zh_tm1637_send_data(zh_tm1637_handle_t *handle, uint8_t *symbo
     rmt_sync_reset(handle->synchro);
     ZH_ERROR_CHECK(rmt_transmit(handle->tx_channel[0], handle->copy_encoder, &clk_symbols, sizeof(clk_symbols), &tx_transmit_config) == ESP_OK, ESP_FAIL, ++_stats.rmt_driver_error, "RMT driver error.");
     ZH_ERROR_CHECK(rmt_transmit(handle->tx_channel[1], handle->copy_encoder, &dio_symbols, sizeof(dio_symbols), &tx_transmit_config) == ESP_OK, ESP_FAIL, ++_stats.rmt_driver_error, "RMT driver error.");
-    ZH_ERROR_CHECK(rmt_tx_wait_all_done(handle->tx_channel[0], 10) == ESP_OK, ESP_FAIL, ++_stats.rmt_driver_error, "RMT driver error.");
-    ZH_ERROR_CHECK(rmt_tx_wait_all_done(handle->tx_channel[1], 10) == ESP_OK, ESP_FAIL, ++_stats.rmt_driver_error, "RMT driver error.");
+    ZH_ERROR_CHECK(rmt_tx_wait_all_done(handle->tx_channel[0], 1000 / portTICK_PERIOD_MS) == ESP_OK, ESP_FAIL, ++_stats.rmt_driver_error, "RMT driver error.");
+    ZH_ERROR_CHECK(rmt_tx_wait_all_done(handle->tx_channel[1], 1000 / portTICK_PERIOD_MS) == ESP_OK, ESP_FAIL, ++_stats.rmt_driver_error, "RMT driver error.");
     return ESP_OK;
 }
