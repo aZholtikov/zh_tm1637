@@ -77,16 +77,15 @@ extern "C"
     esp_err_t zh_tm1637_deinit(zh_tm1637_handle_t *handle);
 
     /**
-     * @brief Prints an symbols to the LED.
+     * @brief Prints a symbol to the LED.
      *
      * @param[in] handle Pointer to unique TM1637 handle.
-     * @param[in] position Initial print position (0-5).
-     * @param[in] symbols Pointer to symbols to be displayed.
-     * @param[in] size The symbols quantity to be displayed.
+     * @param[in] address Display address (0-5).
+     * @param[in] symbols Symbol to be displayed.
      *
      * @return ESP_OK if success or an error code otherwise.
      */
-    esp_err_t zh_tm1637_print(zh_tm1637_handle_t *handle, uint8_t position, uint8_t *symbols, uint8_t size);
+    esp_err_t zh_tm1637_print(zh_tm1637_handle_t *handle, uint8_t address, uint8_t symbol);
 
     /**
      * @brief Set brightness of the LED.

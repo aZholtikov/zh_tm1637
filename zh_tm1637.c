@@ -50,17 +50,17 @@ esp_err_t zh_tm1637_deinit(zh_tm1637_handle_t *handle) // -V2008
     return ESP_OK;
 }
 
-esp_err_t zh_tm1637_print(zh_tm1637_handle_t *handle, uint8_t position, uint8_t *symbols, uint8_t size) // -V2008
+esp_err_t zh_tm1637_print(zh_tm1637_handle_t *handle, uint8_t address, uint8_t symbol) // -V2008
 {
     ZH_LOGI("Led drive printing started.");
-    ZH_ERROR_CHECK(handle != NULL && symbols != NULL && position <= 5 && size > 0, ESP_ERR_INVALID_ARG, NULL, "Led drive printing failed. Invalid argument.");
+    ZH_ERROR_CHECK(handle != NULL && address <= 5, ESP_ERR_INVALID_ARG, NULL, "Led drive printing failed. Invalid argument.");
     ZH_ERROR_CHECK(handle->is_initialized == true, ESP_FAIL, NULL, "Led drive printing failed. Led drive not initialized.");
-    uint8_t set_data_command = 0x40;
+    uint8_t set_data_command = 0x44;
     ZH_ERROR_CHECK(_zh_tm1637_send_data(handle, &set_data_command, 1) == ESP_OK, ESP_FAIL, NULL, "Led drive printing failed. RMT driver error.");
-    uint8_t print_symbols_command[size + 1];
-    print_symbols_command[0] = position | 0xC0;
-    memcpy(&print_symbols_command[1], symbols, size);
-    ZH_ERROR_CHECK(_zh_tm1637_send_data(handle, print_symbols_command, size + 1) == ESP_OK, ESP_FAIL, NULL, "Led drive printing failed. RMT driver error.");
+    uint8_t print_symbols_command[2];
+    print_symbols_command[0] = address | 0xC0;
+    memcpy(&print_symbols_command[1], &symbol, 1);
+    ZH_ERROR_CHECK(_zh_tm1637_send_data(handle, print_symbols_command, 2) == ESP_OK, ESP_FAIL, NULL, "Led drive printing failed. RMT driver error.");
     uint8_t control_display_command = (handle->brightness == -1) ? 0x80 : handle->brightness | 0x88;
     ZH_ERROR_CHECK(_zh_tm1637_send_data(handle, &control_display_command, 1) == ESP_OK, ESP_FAIL, NULL, "Led drive printing failed. RMT driver error.");
     ZH_LOGI("Led drive printing completed successfully.");
