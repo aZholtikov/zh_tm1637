@@ -74,10 +74,7 @@ void app_main(void)
     config.dio_gpio = GPIO_NUM_26;
     zh_tm1637_init(&config, &tm1637_handle);
     zh_tm1637_set_brightness(&tm1637_handle, 7); // Set brightness.
-    for (uint8_t i = 0; i < 6; ++i)              // Clear LCD.
-    {
-        zh_tm1637_print(&tm1637_handle, i, 0x00);
-    };
+    zh_tm1637_clear(&tm1637_handle);
     vTaskDelay(1000 / portTICK_PERIOD_MS);
     zh_tm1637_print(&tm1637_handle, 0, 0x4F); // 3 on C0H address.
     vTaskDelay(1000 / portTICK_PERIOD_MS);

@@ -109,6 +109,15 @@ extern "C"
      */
     void zh_tm1637_reset_stats(void);
 
+     /**
+     * @brief Clear the LEDs.
+     *
+     * @param[in] handle Pointer to unique TM1637 handle.
+     *
+     * @return ESP_OK if success or an error code otherwise.
+     */
+    esp_err_t zh_tm1637_clear(zh_tm1637_handle_t *handle);
+
 #ifdef __cplusplus
 }
 #endif

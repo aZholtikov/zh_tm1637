@@ -89,6 +89,19 @@ void zh_tm1637_reset_stats(void)
     ZH_LOGI("Error statistic reset successfully.");
 }
 
+esp_err_t zh_tm1637_clear(zh_tm1637_handle_t *handle)
+{
+    ZH_LOGI("Led drive clear started.");
+    ZH_ERROR_CHECK(handle != NULL, ESP_ERR_INVALID_ARG, NULL, "Led drive clear failed. Invalid argument.");
+    ZH_ERROR_CHECK(handle->is_initialized == true, ESP_FAIL, NULL, "Led drive clear failed. Led drive not initialized.");
+    for (uint8_t i = 0; i < 6; ++i)
+    {
+        ZH_ERROR_CHECK(zh_tm1637_print(handle, i, 0x00) == ESP_OK, ESP_FAIL, NULL, "Led drive clear failed. RMT driver error.");
+    };
+    ZH_LOGI("Led drive clear completed successfully.");
+    return ESP_OK;
+}
+
 static esp_err_t _zh_tm1637_validate_config(const zh_tm1637_init_config_t *config, zh_tm1637_handle_t *handle)
 {
     ZH_ERROR_CHECK(config->clk_gpio < GPIO_NUM_MAX && config->dio_gpio < GPIO_NUM_MAX, ESP_ERR_INVALID_ARG, NULL, "Invalid GPIO number.")
