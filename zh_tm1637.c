@@ -30,6 +30,10 @@ esp_err_t zh_tm1637_init(const zh_tm1637_init_config_t *config, zh_tm1637_handle
     ZH_ERROR_CHECK(handle->is_initialized == false, ESP_ERR_INVALID_STATE, NULL, "Led drive initialization failed. Led drive is already initialized.");
     ZH_ERROR_CHECK(_zh_tm1637_validate_config(config, handle) == ESP_OK, ESP_FAIL, NULL, "Led drive initialization failed. Initial configuration check failed.");
     ZH_ERROR_CHECK(_zh_tm1637_rmt_init(config, handle) == ESP_OK, ESP_FAIL, , "Led drive initialization failed. RMT initialization failed.");
+    for (uint8_t i = 0; i < 6; ++i)
+    {
+        handle->digit_positions[i] = i;
+    }
     handle->brightness = 7;
     handle->is_initialized = true;
     ZH_LOGI("Led drive initialization completed successfully.");
@@ -50,7 +54,7 @@ esp_err_t zh_tm1637_deinit(zh_tm1637_handle_t *handle) // -V2008
     return ESP_OK;
 }
 
-esp_err_t zh_tm1637_print(zh_tm1637_handle_t *handle, uint8_t address, uint8_t symbol) // -V2008
+esp_err_t zh_tm1637_print(zh_tm1637_handle_t *handle, zh_tm1637_address_t address, uint8_t symbol) // -V2008
 {
     ZH_LOGI("Led drive printing started.");
     ZH_ERROR_CHECK(handle != NULL && address <= 5, ESP_ERR_INVALID_ARG, NULL, "Led drive printing failed. Invalid argument.");
@@ -96,9 +100,151 @@ esp_err_t zh_tm1637_clear(zh_tm1637_handle_t *handle)
     ZH_ERROR_CHECK(handle->is_initialized == true, ESP_FAIL, NULL, "Led drive clear failed. Led drive not initialized.");
     for (uint8_t i = 0; i < 6; ++i)
     {
-        ZH_ERROR_CHECK(zh_tm1637_print(handle, i, 0x00) == ESP_OK, ESP_FAIL, NULL, "Led drive clear failed. RMT driver error.");
-    };
+        ZH_ERROR_CHECK(zh_tm1637_print(handle, (zh_tm1637_address_t)i, 0x00) == ESP_OK, ESP_FAIL, NULL, "Led drive clear failed. RMT driver error.");
+    }
     ZH_LOGI("Led drive clear completed successfully.");
+    return ESP_OK;
+}
+
+esp_err_t zh_tm1637_set(zh_tm1637_handle_t *handle, zh_tm1637_address_t digit_0, zh_tm1637_address_t digit_1, zh_tm1637_address_t digit_2, zh_tm1637_address_t digit_3, zh_tm1637_address_t digit_4, zh_tm1637_address_t digit_5) // -V2008
+{
+    ZH_LOGI("Led drive set physical correspondence started.");
+    ZH_ERROR_CHECK(handle != NULL, ESP_ERR_INVALID_ARG, NULL, "Led drive set physical correspondence failed. Invalid argument.");
+    ZH_ERROR_CHECK(digit_0 < ZH_TM1637_MAX && digit_1 < ZH_TM1637_MAX && digit_2 < ZH_TM1637_MAX && digit_3 < ZH_TM1637_MAX && digit_4 < ZH_TM1637_MAX && digit_5 < ZH_TM1637_MAX, ESP_ERR_INVALID_ARG, NULL, "Led drive set physical correspondence failed. Invalid address.");
+    ZH_ERROR_CHECK(handle->is_initialized == true, ESP_FAIL, NULL, "Led drive set physical correspondence failed. Led drive not initialized.");
+    uint8_t matrix[] = {digit_0, digit_1, digit_2, digit_3, digit_4, digit_5};
+    for (uint8_t i = 0; i < sizeof(matrix); ++i)
+    {
+        for (uint8_t j = i + 1; j < sizeof(matrix); ++j)
+        {
+            ZH_ERROR_CHECK(matrix[i] != matrix[j], ESP_ERR_INVALID_ARG, NULL, "Led drive set physical correspondence failed. Addresses are repeated.");
+        }
+    }
+    handle->digit_positions[0] = digit_0;
+    handle->digit_positions[1] = digit_1;
+    handle->digit_positions[2] = digit_2;
+    handle->digit_positions[3] = digit_3;
+    handle->digit_positions[4] = digit_4;
+    handle->digit_positions[5] = digit_5;
+    ZH_LOGI("Led drive set physical correspondence completed successfully.");
+    return ESP_OK;
+}
+
+esp_err_t zh_tm1637_print_int(zh_tm1637_handle_t *handle, uint8_t position, int value) // -V2008
+{
+    ZH_LOGI("Led drive print int started.");
+    ZH_ERROR_CHECK(handle != NULL && position <= 5, ESP_ERR_INVALID_ARG, NULL, "Led drive print int failed. Invalid argument.");
+    ZH_ERROR_CHECK(handle->is_initialized == true, ESP_FAIL, NULL, "Led drive print int failed. Led drive not initialized.");
+    char char_buffer[6] = {0};
+    sprintf(char_buffer, "%d", value);
+    for (uint8_t i = 0; i < sizeof(char_buffer) - position; ++i)
+    {
+        uint8_t int_symbol = 0x00;
+        switch (char_buffer[i])
+        {
+        case '-':
+            int_symbol = 0x40;
+            break;
+        case '0':
+            int_symbol = 0x3F;
+            break;
+        case '1':
+            int_symbol = 0x06;
+            break;
+        case '2':
+            int_symbol = 0x5B;
+            break;
+        case '3':
+            int_symbol = 0x4F;
+            break;
+        case '4':
+            int_symbol = 0x66;
+            break;
+        case '5':
+            int_symbol = 0x6D;
+            break;
+        case '6':
+            int_symbol = 0x7D;
+            break;
+        case '7':
+            int_symbol = 0x07;
+            break;
+        case '8':
+            int_symbol = 0x7F;
+            break;
+        case '9':
+            int_symbol = 0x6F;
+            break;
+        default:
+            break;
+        }
+        if (int_symbol != 0x00)
+        {
+            ZH_ERROR_CHECK(zh_tm1637_print(handle, handle->digit_positions[i + position], int_symbol) == ESP_OK, ESP_FAIL, NULL, "Led drive print int failed. RMT driver error.");
+        }
+    }
+    ZH_LOGI("Led drive print int completed successfully.");
+    return ESP_OK;
+}
+
+esp_err_t zh_tm1637_print_float(zh_tm1637_handle_t *handle, uint8_t position, float value, uint8_t precision) // -V2008
+{
+    ZH_LOGI("Led drive print float started.");
+    ZH_ERROR_CHECK(handle != NULL && position <= 5, ESP_ERR_INVALID_ARG, NULL, "Led drive print float failed. Invalid argument.");
+    ZH_ERROR_CHECK(handle->is_initialized == true, ESP_FAIL, NULL, "Led drive print float failed. Led drive not initialized.");
+    char char_buffer[7] = {0};
+    uint8_t dot_offset = 0;
+    sprintf(char_buffer, "%.*f", precision, value); // -V512
+    for (uint8_t i = 0; i < sizeof(char_buffer) - position; ++i)
+    {
+        uint8_t int_symbol = 0x00;
+        switch (char_buffer[i])
+        {
+        case '.':
+            dot_offset = 1;
+            break;
+        case '-':
+            int_symbol = 0x40;
+            break;
+        case '0':
+            int_symbol = (char_buffer[i + 1] == '.') ? 0xBF : 0x3F;
+            break;
+        case '1':
+            int_symbol = (char_buffer[i + 1] == '.') ? 0x86 : 0x06;
+            break;
+        case '2':
+            int_symbol = (char_buffer[i + 1] == '.') ? 0xDB : 0x5B;
+            break;
+        case '3':
+            int_symbol = (char_buffer[i + 1] == '.') ? 0xCF : 0x4F;
+            break;
+        case '4':
+            int_symbol = (char_buffer[i + 1] == '.') ? 0xE6 : 0x66;
+            break;
+        case '5':
+            int_symbol = (char_buffer[i + 1] == '.') ? 0xED : 0x6D;
+            break;
+        case '6':
+            int_symbol = (char_buffer[i + 1] == '.') ? 0xFD : 0x7D;
+            break;
+        case '7':
+            int_symbol = (char_buffer[i + 1] == '.') ? 0x87 : 0x07;
+            break;
+        case '8':
+            int_symbol = (char_buffer[i + 1] == '.') ? 0xFF : 0x7F;
+            break;
+        case '9':
+            int_symbol = (char_buffer[i + 1] == '.') ? 0xEF : 0x6F;
+            break;
+        default:
+            break;
+        }
+        if (int_symbol != 0x00 && (i + position - dot_offset) != 6)
+        {
+            ZH_ERROR_CHECK(zh_tm1637_print(handle, handle->digit_positions[i + position - dot_offset], int_symbol) == ESP_OK, ESP_FAIL, NULL, "Led drive print float failed. RMT driver error.");
+        }
+    }
+    ZH_LOGI("Led drive print float completed successfully.");
     return ESP_OK;
 }
 

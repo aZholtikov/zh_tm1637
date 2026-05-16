@@ -11,10 +11,7 @@
 ## Features
 
 1. Support up to 4 led drives on one device (depends on the used ESP32 chip).
-
-## Note
-
-1. Just simple driver without any additives.
+2. Print raw symbols, int and float values.
 
 ## Attention
 
@@ -44,7 +41,7 @@ In the application, add the component:
 
 ## Examples
 
-One 4 segment led drive on device:
+One 6 segment led drive on device:
 
 ```c
 // Numerical symbols without dot (with dot).
@@ -76,8 +73,21 @@ void app_main(void)
     zh_tm1637_set_brightness(&tm1637_handle, 7); // Set brightness.
     zh_tm1637_clear(&tm1637_handle);
     vTaskDelay(1000 / portTICK_PERIOD_MS);
-    zh_tm1637_print(&tm1637_handle, 0, 0x4F); // 3 on C0H address.
+    zh_tm1637_print(&tm1637_handle, ZH_TM1637_C0H, 0x3F); // 0 on C0H address.
+    zh_tm1637_print(&tm1637_handle, ZH_TM1637_C1H, 0x06); // 1 on C1H address.
+    zh_tm1637_print(&tm1637_handle, ZH_TM1637_C2H, 0x5B); // 2 on C2H address.
+    zh_tm1637_print(&tm1637_handle, ZH_TM1637_C3H, 0x4F); // 3 on C3H address.
+    zh_tm1637_print(&tm1637_handle, ZH_TM1637_C4H, 0x66); // 4 on C4H address.
+    zh_tm1637_print(&tm1637_handle, ZH_TM1637_C5H, 0x6D); // 5 on C5H address.
     vTaskDelay(1000 / portTICK_PERIOD_MS);
-    zh_tm1637_print(&tm1637_handle, 4, 0x87); // 7. on C4H address.
+    // If the display of numbers on the screen does not correspond to the order, it is necessary to establish physical correspondence.
+    // For example you sees 210543. The physical correspondence should be established as follows:
+    zh_tm1637_set(&tm1637_handle, ZH_TM1637_C2H, ZH_TM1637_C1H, ZH_TM1637_C0H, ZH_TM1637_C5H, ZH_TM1637_C4H, ZH_TM1637_C3H);
+    zh_tm1637_clear(&tm1637_handle);
+    zh_tm1637_print_int(&tm1637_handle, 0, 123456);
+    vTaskDelay(1000 / portTICK_PERIOD_MS);
+    zh_tm1637_clear(&tm1637_handle);
+    zh_tm1637_print_float(&tm1637_handle, 0, -156.255, 2);
+    vTaskDelay(1000 / portTICK_PERIOD_MS);
 }
 ```
